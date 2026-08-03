@@ -1,0 +1,148 @@
+/* design-sync Tailwind compile entry.
+ *
+ * shadcn/ui is a Tailwind v4 (CSS-first) design system: apps/v4/app/globals.css
+ * is a SOURCE file, not shippable CSS. Tailwind generates utilities on demand by
+ * scanning source files, so a bundle built straight from globals.css would ship
+ * the token variables with no utility rules to consume them and every component
+ * would render unstyled.
+ *
+ * This entry re-imports the repo's real globals.css (tokens, @theme mappings,
+ * base layer, custom utilities — untouched) and adds:
+ *   1. @source coverage over the registry, so every class the components and
+ *      their examples use is generated.
+ *   2. an @source inline(...) safelist of the standard utility scale, so layout
+ *      glue written by the claude.ai/design agent (which is NOT in this repo and
+ *      therefore cannot be scanned) resolves instead of silently missing.
+ *
+ * Rebuild with:
+ *   node .ds-sync/node_modules/@tailwindcss/cli/dist/index.mjs \
+ *     -i .design-sync/tailwind-entry.css -o .design-sync/.cache/shadcn-compiled.css
+ */
+
+@import "../apps/v4/app/globals.css";
+
+/* ── 1. Scan the real registry sources ─────────────────────────────────── */
+@source "../apps/v4/registry/new-york-v4/ui/**/*.tsx";
+@source "../apps/v4/registry/new-york-v4/examples/**/*.tsx";
+@source "../apps/v4/registry/new-york-v4/blocks/**/*.tsx";
+@source "../apps/v4/registry/new-york-v4/charts/**/*.tsx";
+@source "./previews/**/*.tsx";
+
+/* ── 1b. Font variables Next normally injects ───────────────────────────── */
+/* apps/v4/lib/fonts.ts binds Geist / Geist Mono to these via next/font, and
+ * globals.css declares them as self-references inside `@theme inline`
+ * (`--font-sans: var(--font-sans)`). Outside Next nothing ever defines them, so
+ * every `font-sans` utility resolves to nothing and designs fall back to the
+ * browser default. The @font-face rules ship separately via cfg.extraFonts. */
+:root {
+  --font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-heading: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo,
+    Consolas, "Liberation Mono", monospace;
+}
+
+/* The docs app puts `font-sans antialiased` on <body> in JSX; designs built
+ * from this bundle have no such wrapper, so make it the document default. */
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* ── 2. Safelist: the vocabulary a design agent writes for its own layout ─ */
+
+/* Display / flow */
+@source inline("{,sm:,md:,lg:,xl:}{block,inline-block,inline,flex,inline-flex,grid,inline-grid,hidden,contents,table,flow-root}");
+
+/* Flexbox + grid */
+@source inline("{,sm:,md:,lg:,xl:}flex-{row,row-reverse,col,col-reverse,wrap,wrap-reverse,nowrap,1,auto,initial,none}");
+@source inline("{,sm:,md:,lg:,xl:}{shrink,grow}{,-0}");
+@source inline("{,sm:,md:,lg:,xl:}items-{start,center,end,baseline,stretch}");
+@source inline("{,sm:,md:,lg:,xl:}justify-{start,center,end,between,around,evenly,stretch}");
+@source inline("{,sm:,md:,lg:,xl:}self-{auto,start,center,end,stretch,baseline}");
+@source inline("{,sm:,md:,lg:,xl:}content-{start,center,end,between,around,evenly}");
+@source inline("{,sm:,md:,lg:,xl:}grid-cols-{1,2,3,4,5,6,7,8,9,10,11,12,none,subgrid}");
+@source inline("{,sm:,md:,lg:,xl:}grid-rows-{1,2,3,4,5,6,none}");
+@source inline("{,sm:,md:,lg:,xl:}col-span-{1,2,3,4,5,6,7,8,9,10,11,12,full}");
+@source inline("{,sm:,md:,lg:,xl:}row-span-{1,2,3,4,5,6,full}");
+@source inline("{,sm:,md:,lg:,xl:}col-start-{1,2,3,4,5,6,7,8,9,10,11,12,13,auto}");
+@source inline("{,sm:,md:,lg:,xl:}order-{first,last,none,1,2,3,4,5,6}");
+@source inline("{,sm:,md:,lg:,xl:}auto-{cols,rows}-{auto,min,max,fr}");
+@source inline("{,sm:,md:,lg:,xl:}grid-flow-{row,col,dense,row-dense,col-dense}");
+
+/* Spacing — gap / padding / margin / space-between */
+@source inline("{,sm:,md:,lg:,xl:}gap{,-x,-y}-{0,0.5,1,1.5,2,2.5,3,3.5,4,5,6,7,8,9,10,11,12,14,16,20,24,px}");
+@source inline("{,sm:,md:,lg:,xl:}p{,x,y,t,r,b,l,s,e}-{0,0.5,1,1.5,2,2.5,3,3.5,4,5,6,7,8,9,10,11,12,14,16,20,24,32,px}");
+@source inline("{,sm:,md:,lg:,xl:}{,-}m{,x,y,t,r,b,l,s,e}-{0,0.5,1,1.5,2,2.5,3,3.5,4,5,6,7,8,9,10,11,12,14,16,20,24,32,px,auto}");
+@source inline("{,sm:,md:,lg:,xl:}space-{x,y}-{0,0.5,1,1.5,2,2.5,3,3.5,4,5,6,8,10,12,reverse}");
+
+/* Sizing */
+@source inline("{,sm:,md:,lg:,xl:}{w,h,size}-{0,0.5,1,1.5,2,2.5,3,3.5,4,5,6,7,8,9,10,11,12,14,16,20,24,28,32,36,40,44,48,56,64,72,80,96,px,auto,full,screen,min,max,fit,dvh,dvw,svh}");
+@source inline("{,sm:,md:,lg:,xl:}w-{1/2,1/3,2/3,1/4,2/4,3/4,1/5,2/5,3/5,4/5,1/6,5/6,1/12,5/12,7/12,11/12}");
+@source inline("{,sm:,md:,lg:,xl:}max-w-{none,xs,sm,md,lg,xl,2xl,3xl,4xl,5xl,6xl,7xl,full,min,max,fit,prose,screen-sm,screen-md,screen-lg,screen-xl}");
+@source inline("{,sm:,md:,lg:,xl:}min-w-{0,full,min,max,fit}");
+@source inline("{,sm:,md:,lg:,xl:}max-h-{none,full,screen,dvh,svh,min,max,fit,0,16,24,32,40,48,56,64,80,96}");
+@source inline("{,sm:,md:,lg:,xl:}min-h-{0,full,screen,dvh,svh,min,max,fit,16,24,32,40,48,64}");
+@source inline("aspect-{auto,square,video}");
+
+/* Typography */
+@source inline("{,sm:,md:,lg:,xl:}text-{xs,sm,base,lg,xl,2xl,3xl,4xl,5xl,6xl,7xl,8xl,9xl}");
+@source inline("{,sm:,md:,lg:,xl:}text-{left,center,right,justify,start,end}");
+@source inline("font-{thin,extralight,light,normal,medium,semibold,bold,extrabold,black}");
+@source inline("font-{sans,serif,mono,heading}");
+@source inline("{italic,not-italic,underline,line-through,no-underline,uppercase,lowercase,capitalize,normal-case,truncate,text-balance,text-pretty,tabular-nums,antialiased}");
+@source inline("leading-{none,tight,snug,normal,relaxed,loose,3,4,5,6,7,8,9,10}");
+@source inline("tracking-{tighter,tight,normal,wide,wider,widest}");
+@source inline("line-clamp-{1,2,3,4,5,6,none}");
+@source inline("{whitespace-{normal,nowrap,pre,pre-line,pre-wrap},break-{words,all,keep},wrap-{break-word,anywhere}}");
+@source inline("list-{none,disc,decimal,inside,outside}");
+
+/* Theme colors — the shadcn token surface, on every color-consuming property */
+@source inline("{,hover:,focus:,focus-visible:,active:,disabled:,group-hover:,dark:,dark:hover:}{bg,text,border,ring,fill,stroke,outline,decoration,divide,shadow,accent,caret}-{background,foreground,card,card-foreground,popover,popover-foreground,primary,primary-foreground,secondary,secondary-foreground,muted,muted-foreground,accent,accent-foreground,destructive,destructive-foreground,border,input,ring,chart-1,chart-2,chart-3,chart-4,chart-5,sidebar,sidebar-foreground,sidebar-primary,sidebar-primary-foreground,sidebar-accent,sidebar-accent-foreground,sidebar-border,sidebar-ring}");
+@source inline("{,hover:,dark:}{bg,text,border}-{transparent,current,inherit,white,black}");
+@source inline("{bg,text,border}-{slate,gray,zinc,neutral,stone,red,orange,amber,yellow,lime,green,emerald,teal,cyan,sky,blue,indigo,violet,purple,fuchsia,pink,rose}-{50,100,200,300,400,500,600,700,800,900,950}");
+@source inline("{,hover:,dark:}bg-{primary,secondary,muted,accent,destructive,card,popover}/{5,10,20,30,40,50,60,70,80,90}");
+@source inline("bg-{none,gradient-to-t,gradient-to-tr,gradient-to-r,gradient-to-br,gradient-to-b,gradient-to-bl,gradient-to-l,gradient-to-tl}");
+
+/* Borders, radius, shadow, ring */
+@source inline("border{,-x,-y,-t,-r,-b,-l}{,-0,-2,-4,-8}");
+@source inline("border-{solid,dashed,dotted,double,none}");
+@source inline("rounded{,-t,-r,-b,-l,-tl,-tr,-br,-bl}-{none,xs,sm,md,lg,xl,2xl,3xl,4xl,full}");
+@source inline("{,hover:,focus:,dark:}shadow-{2xs,xs,sm,md,lg,xl,2xl,none,inner}");
+@source inline("ring{,-0,-1,-2,-4,-8,-inset}");
+@source inline("{,focus-visible:}ring-{0,1,2,4,8}");
+@source inline("divide-{x,y}{,-0,-2,-4,-reverse}");
+@source inline("outline{,-none,-hidden,-0,-1,-2,-4,-offset-0,-offset-1,-offset-2,-offset-4}");
+@source inline("ring-offset-{0,1,2,4,8,background}");
+
+/* Position / layering / overflow */
+@source inline("{,sm:,md:,lg:,xl:}{static,fixed,absolute,relative,sticky}");
+@source inline("{inset,inset-x,inset-y,top,right,bottom,left,start,end}-{0,0.5,1,2,3,4,5,6,8,10,12,16,20,24,auto,full,px,1/2}");
+@source inline("-{inset,top,right,bottom,left}-{1,2,3,4,5,6,8,10,12,px}");
+@source inline("z-{0,10,20,30,40,50,auto}");
+@source inline("{,sm:,md:,lg:,xl:}overflow{,-x,-y}-{auto,hidden,clip,visible,scroll}");
+@source inline("overscroll-{auto,contain,none}");
+
+/* Effects / interactivity / motion */
+@source inline("opacity-{0,5,10,20,25,30,40,50,60,70,75,80,90,95,100}");
+@source inline("{,hover:,group-hover:}scale-{75,90,95,100,105,110,125}");
+@source inline("rotate-{0,45,90,180,270}");
+@source inline("transition{,-all,-colors,-opacity,-shadow,-transform,-none}");
+@source inline("duration-{75,100,150,200,300,500,700,1000}");
+@source inline("ease-{linear,in,out,in-out}");
+@source inline("animate-{none,spin,ping,pulse,bounce}");
+@source inline("cursor-{auto,default,pointer,wait,text,move,help,not-allowed,grab,grabbing}");
+@source inline("select-{none,text,all,auto}");
+@source inline("pointer-events-{none,auto}");
+@source inline("{sr-only,not-sr-only,isolate,backdrop-blur-sm,backdrop-blur,backdrop-blur-md,backdrop-blur-lg,blur-sm,blur,blur-md,blur-lg}");
+@source inline("object-{contain,cover,fill,none,scale-down,center,top,bottom,left,right}");
+@source inline("{,dark:}{invisible,visible,collapse}");
+
+/* Data-state / ARIA variants the shadcn components key off */
+@source inline("data-[state={open,closed,checked,unchecked,active,inactive,on,off}]:{bg,text,border}-{primary,secondary,muted,accent,background,foreground,muted-foreground,accent-foreground,primary-foreground}");
+@source inline("data-[state={open,closed}]:{block,hidden,flex}");
+@source inline("{aria-{selected,expanded,disabled,checked},peer-{checked,disabled,focus},group-{hover,focus},disabled:,has-[>svg]:}:{opacity-50,pointer-events-none,cursor-not-allowed}");

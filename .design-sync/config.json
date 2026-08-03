@@ -1,0 +1,30 @@
+{
+  "projectId": "10d707de-dc02-4a59-80e3-ad8c90e9311b",
+  "shape": "package",
+  "pkg": "v4",
+  "globalName": "ShadcnUI",
+  "srcDir": "registry/new-york-v4/ui",
+  "tsconfig": "../../.design-sync/tsconfig.paths.json",
+  "docsDir": "content/docs/components/radix",
+  "readmeHeader": ".design-sync/conventions.md",
+  "cssEntry": ".ds-compiled.css",
+  "extraFonts": ["../../.design-sync/fonts/geist.css"],
+  "runtimeFontPrefixes": ["Cambria"],
+  "overrides": {
+    "Dialog": { "cardMode": "single", "viewport": "720x520" },
+    "DropdownMenu": { "cardMode": "single", "viewport": "640x480" },
+    "Popover": { "cardMode": "single", "viewport": "640x420" },
+    "Tooltip": { "cardMode": "single", "viewport": "640x320" },
+    "Command": { "cardMode": "single", "viewport": "680x520" },
+    "Select": { "cardMode": "single", "primaryStory": "FruitPicker" },
+    "Toaster": { "cardMode": "single", "viewport": "640x400" },
+    "Sidebar": { "cardMode": "single", "viewport": "1000x620" },
+    "Table": { "cardMode": "column" },
+    "Calendar": { "cardMode": "column" },
+    "Field": { "cardMode": "column" }
+  },
+  "libOverrides": {
+    "source-kit.mjs": "flat registry dir defeats the group heuristic; compound sub-parts need their defining file pinned for group + JSDoc"
+  },
+  "buildCmd": "COREPACK_ENABLE_STRICT=0 pnpm --filter=@shadcn/react --filter=@shadcn/helpers --filter=shadcn build && ln -sfn ../apps/v4 node_modules/v4 && node .ds-sync/node_modules/@tailwindcss/cli/dist/index.mjs -i .design-sync/tailwind-entry.css -o apps/v4/.ds-compiled.css"
+}
