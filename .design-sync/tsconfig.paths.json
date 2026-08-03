@@ -1,0 +1,23 @@
+{
+  "_readme": "Comment-free copy of apps/v4/tsconfig.json compilerOptions, used as cfg.tsconfig. See .design-sync/NOTES.md, section 'Why cfg.tsconfig points at a copy'. baseUrl is relative to THIS file. Do not add block comments or any asterisk-slash sequence to this file.",
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "baseUrl": "../apps/v4",
+    "paths": {
+      "@/app/(create)/*": ["./app/(app)/(create)/*"],
+      "@/app/(app)/create/*": ["./app/(app)/(create)/*"],
+      "@/*": ["./*"]
+    }
+  }
+}
